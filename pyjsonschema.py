@@ -14,14 +14,14 @@ def validate_required(instance, schema):
 
 
 def json2py(t):
-    if t == "object":
-        return ["<class 'dict'>"]
-    if t == "number":
-        return ["<class 'int'>", "<class 'float'>"]
-    if t == "string":
-        return ["<class 'str'>"]
-    if t == "array":
-        return ["<class 'list'>", "<class 'dict'>"]
+    return {
+        "object": ["<class 'dict'>"],
+        "number": ["<class 'int'>", "<class 'float'>"],
+        "integer": ["<class 'int'>"],
+        "string": ["<class 'str'>"],
+        "array": ["<class 'list'>", "<class 'dict'>"],
+        "boolean": ["<class 'bool'>"]
+    }.get(t, "Invalid type")
 
 
 def validate(instance, schema):
@@ -33,6 +33,10 @@ def validate(instance, schema):
         if 'type' in schema:
             if str(type(instance)) not in json2py(schema['type']):
                 raise ValidationError("{} is not of type '{}'".format(instance, schema['type']))
+            if schema['type'] in ['number', 'integer']:
+                if 'exclusiveMinimum' in schema:
+                    if instance <= int(schema['exclusiveMinimum']):
+                        raise ValidationError("{} should be bigger than {}".format(instance, schema['exclusiveMinimum']))
         if 'not' in schema:
             if instance in schema['not']['enum']:
                 raise ValidationError("{} is not allowed for '{}'".format(instance, schema['not']))
