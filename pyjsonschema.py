@@ -24,30 +24,37 @@ def validate(instance, schema):
         for i in instance:
             validate(i, schema)
     else:
-        check_required(instance, schema)
-        check_type(instance, schema)
-        check_not(instance, schema)
-        check_properties(instance, schema)
+        for key in schema.keys():
+            {
+                'properties': check_properties,
+                'not': check_not,
+                'type': check_type,
+                'required': check_required
+            }.get(key, lambda i, s: print("{} unexpected".format(key)))(instance, schema)
 
 
 def check_properties(instance, schema):
-    if 'properties' in schema:
-        for key in schema['properties'].keys():
-            validate(instance[key], schema['properties'][key])
+    for key in schema['properties'].keys():
+        validate(instance[key], schema['properties'][key])
 
 
 def check_not(instance, schema):
-    if 'not' in schema:
-        if instance in schema['not']['enum']:
-            raise ValidationError("{} is not allowed for '{}'".format(instance, schema['not']))
+    if instance in schema['not']['enum']:
+        raise ValidationError("{} is not allowed for '{}'".format(instance, schema['not']))
 
 
 def check_type(instance, schema):
-    if 'type' in schema:
-        if str(type(instance)) not in json2py(schema['type']):
-            raise ValidationError("{} is not of type '{}'".format(instance, schema['type']))
-        check_string_type(instance, schema)
-        check_number_type(instance, schema)
+    if str(type(instance)) not in json2py(schema['type']):
+        raise ValidationError("{} is not of type '{}'".format(instance, schema['type']))
+    check_string_type(instance, schema)
+    check_number_type(instance, schema)
+
+
+def check_required(instance, schema):
+    if len(schema['required']) > 0:
+        for required in schema['required']:
+            if required not in instance:
+                raise ValidationError("'{}' is a required property".format(required))
 
 
 def check_number_type(instance, schema):
@@ -69,14 +76,6 @@ def check_string_type(instance, schema):
                 'minLength': lambda i, s, k: (len(i) < s[k],"{} length is smaller than {}".format(i, s[k])),
                 'maxLength': lambda i, s, k: (len(i) > s[k],"{} length is bigger than {}".format(i, s[k]))
             }.get(key, contradiction)(instance, schema, key)))
-
-
-def check_required(instance, schema):
-    if 'required' in schema:
-        if len(schema['required']) > 0:
-            for required in schema['required']:
-                if required not in instance:
-                    raise ValidationError("'{}' is a required property".format(required))
 
 
 def check(tpl):
