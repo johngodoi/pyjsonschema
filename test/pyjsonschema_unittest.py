@@ -139,6 +139,20 @@ class TestPyJsonSchema(unittest.TestCase):
         # with self.assertRaises(pyjsonschema.ValidationError):
         #    pyjsonschema.validate(["Life", "the universe", "and everything"],{"type": ["number", "string"]})
 
+    def test_null_type_validation(self):
+        pyjsonschema.validate(None, {"type": "null"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate(1, {"type": "null"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate(1.2, {"type": "null"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate("foo", {"type": "null"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate({}, {"type": "null"})
+        # FIXME this is a bug
+        # with self.assertRaises(pyjsonschema.ValidationError):
+        #     pyjsonschema.validate([], {"type": "null"})
+
     def test_successful_types_validation(self):
         pyjsonschema.validate({}, {"type": "object"})
         pyjsonschema.validate([], {"type": "array"})
