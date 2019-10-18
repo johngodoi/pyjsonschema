@@ -5,14 +5,6 @@ class ValidationError(Exception):
         self.message = message
 
 
-def validate_required(instance, schema):
-    if 'required' in schema:
-        if len(schema['required']) > 0:
-            for required in schema['required']:
-                if required not in instance:
-                    raise ValidationError("'{}' is a required property".format(required))
-
-
 def json2py(tp):
     if type(tp) is list:
         return [t for x in tp for t in json2py(x)]
@@ -32,7 +24,7 @@ def validate(instance, schema):
         for i in instance:
             validate(i, schema)
     else:
-        validate_required(instance, schema)
+        check_required(instance, schema)
         check_type(instance, schema)
         check_not(instance, schema)
         check_properties(instance, schema)
@@ -58,11 +50,6 @@ def check_type(instance, schema):
         check_number_type(instance, schema)
 
 
-def check(tpl):
-    if tpl[0]:
-        raise ValidationError(tpl[1])
-
-
 def check_number_type(instance, schema):
     if schema['type'] in ['number', 'integer']:
         for key in schema.keys():
@@ -72,7 +59,7 @@ def check_number_type(instance, schema):
                 'minimum': lambda i, s, k: (i < s[k], "{} should be bigger than {}".format(i, s[k])),
                 'exclusiveMaximum': lambda i, s, k: (i >= s[k], "{} should be smaller than {}".format(i, s[k])),
                 'maximum': lambda i, s, k: (i > s[k], "{} should be smaller than {}".format(i, s[k]))
-            }.get(key, lambda i, s, k: (False, ""))(instance, schema, key)))
+            }.get(key, contradiction)(instance, schema, key)))
 
 
 def check_string_type(instance, schema):
@@ -81,4 +68,21 @@ def check_string_type(instance, schema):
             check(({
                 'minLength': lambda i, s, k: (len(i) < s[k],"{} length is smaller than {}".format(i, s[k])),
                 'maxLength': lambda i, s, k: (len(i) > s[k],"{} length is bigger than {}".format(i, s[k]))
-            }.get(key, lambda i, s, k: (False, ""))(instance, schema, key)))
+            }.get(key, contradiction)(instance, schema, key)))
+
+
+def check_required(instance, schema):
+    if 'required' in schema:
+        if len(schema['required']) > 0:
+            for required in schema['required']:
+                if required not in instance:
+                    raise ValidationError("'{}' is a required property".format(required))
+
+
+def check(tpl):
+    if tpl[0]:
+        raise ValidationError(tpl[1])
+
+
+def contradiction(instance, schema, key):
+    return False, ""
