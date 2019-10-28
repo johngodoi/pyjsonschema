@@ -7,7 +7,7 @@ class ValidationError(Exception):
 
 def json2py(tp):
     if type(tp) is list:
-        return [t for x in tp for t in json2py(x)]
+        return [t for x in tp for t in json2py(x)] #flat_map
     return {
         "object": ["<class 'dict'>"],
         "number": ["<class 'int'>", "<class 'float'>"],
@@ -35,7 +35,8 @@ def validate(instance, schema):
 
 def check_properties(instance, schema):
     for key in schema['properties'].keys():
-        validate(instance[key], schema['properties'][key])
+        if key in instance.keys():
+            validate(instance[key], schema['properties'][key])
 
 
 def check_not(instance, schema):

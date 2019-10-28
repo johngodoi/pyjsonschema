@@ -5,6 +5,16 @@ import pyjsonschema
 
 class TestPyJsonSchema(unittest.TestCase):
 
+    def test_instance_fields_not_declared_at_schema(self):
+        instance = {"name": "Eggs", "alias": "huevos"}
+        schema = {"type": "object", "properties": {"price": {"type": "number"}, "name": {"type": "string"}, }, }
+        pyjsonschema.validate(instance, schema)
+
+    def test_instance_fields_less_than_schema(self):
+        instance = {"name": "Eggs"}
+        schema = {"type": "object", "properties": {"price": {"type": "number"}, "name": {"type": "string"}, }, }
+        pyjsonschema.validate(instance, schema)
+
     def test_simple_success(self):
         instance = {"name": "Eggs", "price": 34.99}
         schema = {"type": "object", "properties": {"price": {"type": "number"}, "name": {"type": "string"}, }, }
