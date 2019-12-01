@@ -10,9 +10,9 @@ And so far that has been our reference.
 
   *  [ ]  Type-specific keywords
         *  [x]  string
-        *  [ ]  Length
+        *  [x]  Length
         *  [ ]  Regular Expressions
-        *  [ ]  Format
+        *  [x]  Format
   *  [ ]  Regular Expressions
         *  [ ]  Example
   *  [ ]  Numeric types

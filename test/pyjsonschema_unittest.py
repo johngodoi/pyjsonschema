@@ -111,6 +111,10 @@ class TestPyJsonSchema(unittest.TestCase):
     def test_string_type_validation(self):
         pyjsonschema.validate("", {"type": "string"})
         pyjsonschema.validate("Déjà vu", {"type": "string"})
+        pyjsonschema.validate("(888)555-1212", {"type": "string", "pattern": "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"})
+        pyjsonschema.validate("2019-11-30", {"type": "string", "pattern": "^(\d+)-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])$"})
+        pyjsonschema.validate("2019-11-22T19:05:12.000+0000", {"type": "string", "pattern": "^(\d+)-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])[\s,T]([01]\d|2[0-3]):([0-5]\d):([0-5]\d|60)(\.\d+)?(([Zz])|([\+|\-]([01]\d\d\d|2[0-3])))$"})
+        pyjsonschema.validate("2019-11-22T19:05:12.000z", {"type": "string", "pattern": "^(\d+)-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])[\s,T]([01]\d|2[0-3]):([0-5]\d):([0-5]\d|60)(\.\d+)?(([Zz])|([\+|\-]([01]\d\d\d|2[0-3])))$"})
         pyjsonschema.validate("42", {"type": "string"})
         pyjsonschema.validate("hi", {"type": "string"})
         pyjsonschema.validate("hi", {"type": "string", "minLength": 2})
@@ -120,6 +124,12 @@ class TestPyJsonSchema(unittest.TestCase):
         pyjsonschema.validate("Hello", {"type": "string", "minLength": 2, "maxLength": 5})
         with self.assertRaises(pyjsonschema.ValidationError):
             pyjsonschema.validate({}, {"type": "string"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate("(800)FLOWERS", {"type": "string", "pattern": "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate("2019/30/30", {"type": "string", "pattern": "^(\d+)-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])$"})
+        with self.assertRaises(pyjsonschema.ValidationError):
+            pyjsonschema.validate("2019-11-22T19:05:12.000+0000Z", {"type": "string", "pattern": "^(\d+)-(0[1-9]|1[012])-(0[1-9]|[12]\d|3[01])[\s,T]([01]\d|2[0-3]):([0-5]\d):([0-5]\d|60)(\.\d+)?(([Zz])|([\+|\-]([01]\d\d\d|2[0-3])))$"})
         with self.assertRaises(pyjsonschema.ValidationError):
             pyjsonschema.validate(42, {"type": "string"})
         with self.assertRaises(pyjsonschema.ValidationError):
